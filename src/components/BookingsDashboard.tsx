@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import type { Json } from '@/integrations/supabase/types';
 
 interface Booking {
   id: string;
@@ -20,7 +21,7 @@ interface Booking {
   total_price: number;
   booking_date: string;
   booking_time: string;
-  selected_addons: any[];
+  selected_addons: Json;
   created_at: string;
   updated_at: string;
 }
@@ -100,6 +101,13 @@ export function BookingsDashboard() {
     }).format(amount);
   };
 
+  const getAddonsCount = (addons: Json): number => {
+    if (Array.isArray(addons)) {
+      return addons.length;
+    }
+    return 0;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -167,9 +175,9 @@ export function BookingsDashboard() {
                           <div className="text-sm text-muted-foreground">
                             Service: {formatCurrency(booking.service_price)}
                           </div>
-                          {booking.selected_addons && booking.selected_addons.length > 0 && (
+                          {getAddonsCount(booking.selected_addons) > 0 && (
                             <div className="text-xs text-muted-foreground">
-                              +{booking.selected_addons.length} addons
+                              +{getAddonsCount(booking.selected_addons)} addons
                             </div>
                           )}
                         </div>
