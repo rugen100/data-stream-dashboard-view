@@ -18,6 +18,8 @@ export type Database = {
           customer_name: string
           customer_phone: string
           id: string
+          payment_confirmed: boolean | null
+          refund: boolean | null
           registration: string
           selected_addons: Json | null
           service_name: string
@@ -37,6 +39,8 @@ export type Database = {
           customer_name: string
           customer_phone: string
           id?: string
+          payment_confirmed?: boolean | null
+          refund?: boolean | null
           registration: string
           selected_addons?: Json | null
           service_name: string
@@ -56,6 +60,8 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           id?: string
+          payment_confirmed?: boolean | null
+          refund?: boolean | null
           registration?: string
           selected_addons?: Json | null
           service_name?: string

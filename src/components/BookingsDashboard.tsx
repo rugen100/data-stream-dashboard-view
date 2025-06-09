@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import type { Json } from '@/integrations/supabase/types';
 
@@ -22,6 +23,7 @@ interface Booking {
   booking_date: string;
   booking_time: string;
   selected_addons: Json;
+  payment_confirmed: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -61,7 +63,8 @@ export function BookingsDashboard() {
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('booking_date', { ascending: true })
+        .order('booking_time', { ascending: true });
 
       if (error) {
         console.error('Error fetching bookings:', error);
@@ -108,6 +111,101 @@ export function BookingsDashboard() {
     return 0;
   };
 
+  const isUpcoming = (bookingDate: string, bookingTime: string): boolean => {
+    const now = new Date();
+    const bookingDateTime = new Date(`${bookingDate}T${bookingTime}`);
+    return bookingDateTime > now;
+  };
+
+  const upcomingBookings = bookings.filter(booking => 
+    isUpcoming(booking.booking_date, booking.booking_time)
+  );
+
+  const pastBookings = bookings.filter(booking => 
+    !isUpcoming(booking.booking_date, booking.booking_time)
+  );
+
+  const renderBookingsTable = (bookingsList: Booking[]) => (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Customer</TableHead>
+            <TableHead>Contact</TableHead>
+            <TableHead>Vehicle</TableHead>
+            <TableHead>Service</TableHead>
+            <TableHead>Date & Time</TableHead>
+            <TableHead>Payment</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead>Created</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {bookingsList.map((booking) => (
+            <TableRow key={booking.id} className="hover:bg-muted/50">
+              <TableCell>
+                <div>
+                  <div className="font-medium">{booking.customer_name}</div>
+                  <div className="text-sm text-muted-foreground">{booking.customer_email}</div>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm">{booking.customer_phone}</div>
+              </TableCell>
+              <TableCell>
+                <div>
+                  <div className="font-medium">{booking.registration}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {booking.vehicle_make} {booking.vehicle_model}
+                  </div>
+                  {booking.vehicle_type && (
+                    <div className="text-xs text-muted-foreground">
+                      {booking.vehicle_type} - {booking.vehicle_category}
+                    </div>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div>
+                  <div className="font-medium">{booking.service_name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    Service: {formatCurrency(booking.service_price)}
+                  </div>
+                  {getAddonsCount(booking.selected_addons) > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      +{getAddonsCount(booking.selected_addons)} addons
+                    </div>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div>
+                  <div className="font-medium">{formatDate(booking.booking_date)}</div>
+                  <div className="text-sm text-muted-foreground">{formatTime(booking.booking_time)}</div>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className={`text-sm font-medium ${booking.payment_confirmed ? 'text-green-600' : 'text-orange-600'}`}>
+                  {booking.payment_confirmed ? 'Confirmed' : 'Pending'}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="font-bold text-green-600">
+                  {formatCurrency(booking.total_price)}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm text-muted-foreground">
+                  {formatDate(booking.created_at)}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -126,84 +224,34 @@ export function BookingsDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {bookings.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No bookings found
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Vehicle</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Created</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {bookings.map((booking) => (
-                    <TableRow key={booking.id} className="hover:bg-muted/50">
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{booking.customer_name}</div>
-                          <div className="text-sm text-muted-foreground">{booking.customer_email}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">{booking.customer_phone}</div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{booking.registration}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {booking.vehicle_make} {booking.vehicle_model}
-                          </div>
-                          {booking.vehicle_type && (
-                            <div className="text-xs text-muted-foreground">
-                              {booking.vehicle_type} - {booking.vehicle_category}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{booking.service_name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            Service: {formatCurrency(booking.service_price)}
-                          </div>
-                          {getAddonsCount(booking.selected_addons) > 0 && (
-                            <div className="text-xs text-muted-foreground">
-                              +{getAddonsCount(booking.selected_addons)} addons
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{formatDate(booking.booking_date)}</div>
-                          <div className="text-sm text-muted-foreground">{formatTime(booking.booking_time)}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-bold text-green-600">
-                          {formatCurrency(booking.total_price)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm text-muted-foreground">
-                          {formatDate(booking.created_at)}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          <Tabs defaultValue="upcoming" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upcoming">
+                Upcoming Bookings ({upcomingBookings.length})
+              </TabsTrigger>
+              <TabsTrigger value="past">
+                Past Bookings ({pastBookings.length})
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="upcoming" className="mt-6">
+              {upcomingBookings.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No upcoming bookings found
+                </div>
+              ) : (
+                renderBookingsTable(upcomingBookings)
+              )}
+            </TabsContent>
+            <TabsContent value="past" className="mt-6">
+              {pastBookings.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No past bookings found
+                </div>
+              ) : (
+                renderBookingsTable(pastBookings)
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
