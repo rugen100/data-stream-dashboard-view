@@ -104,11 +104,16 @@ export function BookingsDashboard() {
     }).format(amount);
   };
 
-  const getAddonsCount = (addons: Json): number => {
-    if (Array.isArray(addons)) {
-      return addons.length;
+  const getAddonsDisplay = (addons: Json): string => {
+    if (Array.isArray(addons) && addons.length > 0) {
+      return addons.map(addon => {
+        if (typeof addon === 'object' && addon !== null && 'name' in addon) {
+          return addon.name;
+        }
+        return String(addon);
+      }).join(', ');
     }
-    return 0;
+    return '';
   };
 
   const isUpcoming = (bookingDate: string, bookingTime: string): boolean => {
@@ -171,9 +176,9 @@ export function BookingsDashboard() {
                   <div className="text-sm text-muted-foreground">
                     Service: {formatCurrency(booking.service_price)}
                   </div>
-                  {getAddonsCount(booking.selected_addons) > 0 && (
+                  {getAddonsDisplay(booking.selected_addons) && (
                     <div className="text-xs text-muted-foreground">
-                      +{getAddonsCount(booking.selected_addons)} addons
+                      Addons: {getAddonsDisplay(booking.selected_addons)}
                     </div>
                   )}
                 </div>
