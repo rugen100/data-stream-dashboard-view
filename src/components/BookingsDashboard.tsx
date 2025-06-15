@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,8 +62,7 @@ export function BookingsDashboard() {
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
-        .order('booking_date', { ascending: true })
-        .order('booking_time', { ascending: true });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching bookings:', error);
