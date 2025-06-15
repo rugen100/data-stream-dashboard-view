@@ -23,6 +23,8 @@ interface Booking {
   booking_time: string;
   selected_addons: Json;
   payment_confirmed: boolean | null;
+  deposit_amount: number | null;
+  remaining_amount: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -198,10 +200,10 @@ export function BookingsDashboard() {
                     Total: {formatCurrency(booking.total_price)}
                   </div>
                   <div className="text-sm text-green-600">
-                    Paid: {formatCurrency(booking.payment_confirmed ? booking.total_price : 0)}
+                    Paid: {formatCurrency(booking.deposit_amount ?? 0)}
                   </div>
                   <div className="text-sm text-orange-600">
-                    Due: {formatCurrency(booking.payment_confirmed ? 0 : booking.total_price)}
+                    Due: {formatCurrency(booking.remaining_amount ?? (booking.total_price - (booking.deposit_amount ?? 0)))}
                   </div>
                 </div>
               </TableCell>

@@ -17,10 +17,12 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          deposit_amount: number | null
           id: string
           payment_confirmed: boolean | null
           refund: boolean | null
           registration: string
+          remaining_amount: number | null
           selected_addons: Json | null
           service_name: string
           service_price: number
@@ -38,10 +40,12 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          deposit_amount?: number | null
           id?: string
           payment_confirmed?: boolean | null
           refund?: boolean | null
           registration: string
+          remaining_amount?: number | null
           selected_addons?: Json | null
           service_name: string
           service_price: number
@@ -59,10 +63,12 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           customer_phone?: string
+          deposit_amount?: number | null
           id?: string
           payment_confirmed?: boolean | null
           refund?: boolean | null
           registration?: string
+          remaining_amount?: number | null
           selected_addons?: Json | null
           service_name?: string
           service_price?: number
