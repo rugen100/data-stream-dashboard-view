@@ -22,7 +22,7 @@ interface Booking {
   booking_date: string;
   booking_time: string;
   selected_addons: Json;
-  payment_confirmed: boolean;
+  payment_confirmed: boolean | null;
   created_at: string;
   updated_at: string;
 }
@@ -96,9 +96,9 @@ export function BookingsDashboard() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-GB', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'GBP'
     }).format(amount);
   };
 
@@ -138,8 +138,8 @@ export function BookingsDashboard() {
             <TableHead>Vehicle</TableHead>
             <TableHead>Service</TableHead>
             <TableHead>Date & Time</TableHead>
-            <TableHead>Payment</TableHead>
-            <TableHead>Price</TableHead>
+            <TableHead>Payment Status</TableHead>
+            <TableHead>Billing</TableHead>
             <TableHead>Created</TableHead>
           </TableRow>
         </TableHeader>
@@ -193,8 +193,16 @@ export function BookingsDashboard() {
                 </div>
               </TableCell>
               <TableCell>
-                <div className="font-bold text-green-600">
-                  {formatCurrency(booking.total_price)}
+                <div>
+                  <div className="font-medium">
+                    Total: {formatCurrency(booking.total_price)}
+                  </div>
+                  <div className="text-sm text-green-600">
+                    Paid: {formatCurrency(booking.payment_confirmed ? booking.total_price : 0)}
+                  </div>
+                  <div className="text-sm text-orange-600">
+                    Due: {formatCurrency(booking.payment_confirmed ? 0 : booking.total_price)}
+                  </div>
                 </div>
               </TableCell>
               <TableCell>
