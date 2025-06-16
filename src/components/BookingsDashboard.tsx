@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -104,6 +105,14 @@ export function BookingsDashboard() {
     }).format(amount);
   };
 
+  const calculateDeposit = (totalPrice: number): number => {
+    return totalPrice * 0.2; // 20% deposit
+  };
+
+  const calculateRemaining = (totalPrice: number): number => {
+    return totalPrice * 0.8; // 80% remaining
+  };
+
   const getAddonsDisplay = (addons: Json): string => {
     if (Array.isArray(addons) && addons.length > 0) {
       return addons.map(addon => {
@@ -200,10 +209,10 @@ export function BookingsDashboard() {
                     Total: {formatCurrency(booking.total_price)}
                   </div>
                   <div className="text-sm text-green-600">
-                    Paid: {formatCurrency(booking.deposit_amount ?? 0)}
+                    Deposit (20%): {formatCurrency(calculateDeposit(booking.total_price))}
                   </div>
                   <div className="text-sm text-orange-600">
-                    Due: {formatCurrency(booking.remaining_amount ?? (booking.total_price - (booking.deposit_amount ?? 0)))}
+                    Remaining (80%): {formatCurrency(calculateRemaining(booking.total_price))}
                   </div>
                 </div>
               </TableCell>

@@ -19,6 +19,7 @@ export type Database = {
           customer_phone: string
           deposit_amount: number | null
           id: string
+          is_loyalty_reward: boolean
           payment_confirmed: boolean | null
           refund: boolean | null
           registration: string
@@ -28,6 +29,7 @@ export type Database = {
           service_price: number
           total_price: number
           updated_at: string
+          user_id: string | null
           vehicle_category: string | null
           vehicle_make: string | null
           vehicle_model: string | null
@@ -42,6 +44,7 @@ export type Database = {
           customer_phone: string
           deposit_amount?: number | null
           id?: string
+          is_loyalty_reward?: boolean
           payment_confirmed?: boolean | null
           refund?: boolean | null
           registration: string
@@ -51,6 +54,7 @@ export type Database = {
           service_price: number
           total_price: number
           updated_at?: string
+          user_id?: string | null
           vehicle_category?: string | null
           vehicle_make?: string | null
           vehicle_model?: string | null
@@ -65,6 +69,7 @@ export type Database = {
           customer_phone?: string
           deposit_amount?: number | null
           id?: string
+          is_loyalty_reward?: boolean
           payment_confirmed?: boolean | null
           refund?: boolean | null
           registration?: string
@@ -74,10 +79,148 @@ export type Database = {
           service_price?: number
           total_price?: number
           updated_at?: string
+          user_id?: string | null
           vehicle_category?: string | null
           vehicle_make?: string | null
           vehicle_model?: string | null
           vehicle_type?: string | null
+        }
+        Relationships: []
+      }
+      membership_types: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          price: number
+          stripe_price_id: string | null
+          washes_per_month: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          price: number
+          stripe_price_id?: string | null
+          washes_per_month: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+          stripe_price_id?: string | null
+          washes_per_month?: number
+        }
+        Relationships: []
+      }
+      memberships: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: string
+          membership_type_id: string
+          start_date: string | null
+          status: Database["public"]["Enums"]["membership_status"]
+          stripe_subscription_id: string | null
+          updated_at: string | null
+          user_id: string
+          washes_remaining: number
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          membership_type_id: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["membership_status"]
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id: string
+          washes_remaining?: number
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          membership_type_id?: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["membership_status"]
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+          washes_remaining?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memberships_membership_type_id_fkey"
+            columns: ["membership_type_id"]
+            isOneToOne: false
+            referencedRelation: "membership_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          email: string | null
+          full_name: string | null
+          id: string
+          phone_number: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone_number?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone_number?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          stripe_customer_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -89,7 +232,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      membership_status: "active" | "inactive" | "cancelled" | "payment_failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -204,6 +347,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      membership_status: ["active", "inactive", "cancelled", "payment_failed"],
+    },
   },
 } as const
